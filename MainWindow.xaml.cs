@@ -23,41 +23,68 @@ namespace SerialPortTest
     /// </summary>
     public partial class MainWindow : Window
     {
-        private SerialPortManager serialPortManager;
+        private SerialPort serialPort;
+        private string receivedData = "";
 
         public MainWindow()
         {
             InitializeComponent();
-            serialPortManager = new SerialPortManager("COM3"); // Ersetzen Sie "COMx" mit Ihrer COM-Port-Nummer
-            serialPortManager.DataReceived += OnDataReceived;
-            serialPortManager.OpenPort();
-            _ = serialPortManager.StartReadingAsync();
-        }
 
-        private void btnSendCommand_Click(object sender, RoutedEventArgs e)
-        {
+            // Initialisieren Sie den COM-Port mit den entsprechenden Einstellungen
+            serialPort = new SerialPort("COM3", 38400, Parity.None, 8, StopBits.One);
+
+            serialPort.DataReceived += SerialPort_DataReceived;
+
+
             try
             {
-                serialPortManager.SendCommand("I");
+                serialPort.Open();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Fehler beim Öffnen des COM-Ports: " + ex.Message);
             }
         }
 
-        private void OnDataReceived(string data)
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            // Daten vom COM-Port lesen und an den empfangenen Datenstring anhängen
+            receivedData += serialPort.ReadExisting();
+            Debug.WriteLine(receivedData);
+
+            // Überprüfen, ob die Daten mit CR LF enden
+            if (receivedData.EndsWith("\r\n"))
             {
-                txtResponse.Text = data;
-            });
+                // Verarbeiten Sie die empfangenen Daten hier, z.B. anzeigen Sie sie in einem TextBox-Steuerelement
+                Dispatcher.Invoke(() =>
+                {
+                    txtResponse.Text = receivedData;
+                });
+
+                // Zurücksetzen des empfangenen Datenstrings
+                receivedData = "";
+            }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            serialPortManager.StopReading();
-            serialPortManager.ClosePort();
+            // Beim Schließen der Anwendung den COM-Port schließen
+            if (serialPort.IsOpen)
+            {
+                serialPort.Close();
+            }
+        }
+
+        private void btnSendCommand_Click(object sender, RoutedEventArgs e)
+        {
+            if (serialPort.IsOpen)
+            {
+                serialPort.Write("S");
+            }
+            else
+            {
+                throw new InvalidOperationException("Port ist nicht geöffnet.");
+            }
         }
     }
 
