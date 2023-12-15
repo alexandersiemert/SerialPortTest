@@ -6,20 +6,26 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
+using System.Windows.Threading;
+using System.Windows;
 
 namespace SerialPortTest
 {
     public class SerialPortManager
     {
         private SerialPort serialPort;
-        private StringBuilder dataBuffer = new StringBuilder();
+        private string receivedData = "";
         public event Action<string> DataReceived;
-        private CancellationTokenSource cancellationTokenSource;
 
         public SerialPortManager(string portName)
         {
             serialPort = new SerialPort(portName, 38400, Parity.None, 8, StopBits.One);
-            cancellationTokenSource = new CancellationTokenSource();
+            serialPort.DataReceived += new SerialDataReceivedEventHandler(SerialPort_DataReceived);
+        }
+
+        public string GetPortName()
+        {
+            return serialPort.PortName;
         }
 
         public void OpenPort()
@@ -30,8 +36,13 @@ namespace SerialPortTest
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Fehler beim Öffnen des Ports: " + ex.Message);
+                MessageBox.Show("An error has occurred: " + serialPort.PortName + " not found", "COM-Port Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
             }
+        }
+
+        public bool IsOpen()
+        {
+            return serialPort.IsOpen;
         }
 
         public void ClosePort()
@@ -44,54 +55,40 @@ namespace SerialPortTest
 
         public void SendCommand(string command)
         {
-            if (serialPort.IsOpen)
+            try
             {
                 serialPort.Write(command);
             }
-            else
+            catch(Exception ex)
             {
-                throw new InvalidOperationException("Port ist nicht geöffnet.");
-            }
+                MessageBox.Show("An error has occurred: " + serialPort.PortName + " not open", "COM-Port Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+            }        
         }
 
-        public async Task StartReadingAsync()
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            while (serialPort.IsOpen)
+            try
             {
-                while (!cancellationTokenSource.Token.IsCancellationRequested)
+                // Daten vom COM-Port lesen und an den empfangenen Datenstring anhängen
+                receivedData += serialPort.ReadExisting();
+                Debug.WriteLine(receivedData);
+
+                // Überprüfen, ob die Daten mit CR LF enden
+                if (receivedData.EndsWith("\r\n"))
                 {
-                    try
-                    {
-                        await Task.Delay(50);
-                        string data = serialPort.ReadExisting();
-                        dataBuffer.Append(data);
-                        Debug.WriteLine(data);
-
-                        if (dataBuffer.ToString().Contains("\r\n"))
-                        {
-                            string completeMessage = dataBuffer.ToString();
-                            dataBuffer.Clear();
-                            DataReceived?.Invoke(completeMessage);
-                        }
-                    }
-                    catch (TimeoutException)
-                    {
-                        // Timeout-Handling oder ignoriert
-                    }
+                    // Speichere das Datenpaket ohne CR LF am Ende ab
+                    string completeMessage = receivedData.Substring(0, receivedData.Length - "\r\n".Length);
+                    // Zurücksetzen des empfangenen Datenstrings
+                    receivedData = "";
+                    // Sende das komplette Datenpaket an das Received Event der jeweiligen Instanz des SerialPorts
+                    DataReceived?.Invoke(completeMessage);
                 }
-                
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("An error has occurred: " + serialPort.PortName + ": " + ex.Message, "COM -Port Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
             }
         }
 
-        public void StopReading()
-        {
-            cancellationTokenSource.Cancel();
-        }
-
-        public void RestartReading()
-        {
-            cancellationTokenSource = new CancellationTokenSource();
-            _ = StartReadingAsync();
-        }
     }
 }
