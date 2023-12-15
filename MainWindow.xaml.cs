@@ -29,10 +29,25 @@ namespace SerialPortTest
         {
             InitializeComponent();
             serialPortManager = new SerialPortManager("COM3");
+            serialPortManager.DataReceived += OnDataReceived;
             serialPortManager.OpenPort();
         
         }
 
+        
+
+        /*################################# EVENTHANDLER ##################################################*/
+
+        //Evenhandler für DataReceived
+        private void OnDataReceived(string data)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                txtResponse.Text = data; // Angenommen, txtResponse ist Ihre TextBox
+            });
+        }
+
+        //Evenhandler wenn Fenster geschlossen wird
         private void Window_Closed(object sender, EventArgs e)
         {
             // Beim Schließen der Anwendung den COM-Port schließen
@@ -42,10 +57,10 @@ namespace SerialPortTest
             }
         }
 
+        //Eventhandler für Button 
         private void btnSendCommand_Click(object sender, RoutedEventArgs e)
         {
-            serialPortManager.SendCommand("S");
-
+            serialPortManager.SendCommand("G");
         }
     }
 

@@ -91,7 +91,6 @@ namespace SerialPortTest
             {
                 // Daten vom COM-Port lesen und an den empfangenen Datenstring anhängen
                 receivedData += serialPort.ReadExisting();
-                Debug.WriteLine(receivedData);
                 // Timeout Stoppen
                 StopDataReception();
                 // Timeout wieder starten für nächsten Datenblock
@@ -103,6 +102,7 @@ namespace SerialPortTest
                     StopDataReception();
                     // Speichere das Datenpaket ohne CR LF am Ende ab
                     string completeMessage = receivedData.Substring(0, receivedData.Length - "\r\n".Length);
+                    Debug.WriteLine(completeMessage);
                     // Zurücksetzen des empfangenen Datenstrings
                     receivedData = "";
                     // Verlinke das komplette Datenpaket an das Data Received Event der jeweiligen Instanz des SerialPorts
@@ -126,6 +126,7 @@ namespace SerialPortTest
             dataReceiveTimer.Stop();
         }
 
+        // Event wenn Timeout Timer abgelaufen
         private void DataReceiveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             MessageBox.Show("Timeout: " + serialPort.PortName + " not responding.", "COM-Port Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
