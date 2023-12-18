@@ -24,13 +24,24 @@ namespace SerialPortTest
     public partial class MainWindow : Window
     {
         private SerialPortManager serialPortManager;
+        private List<string> dataLoggerPorts = new List<string>();
 
         public MainWindow()
         {
             InitializeComponent();
-            serialPortManager = new SerialPortManager("COM3");
-            serialPortManager.DataReceived += OnDataReceived;
-            serialPortManager.OpenPort();
+            dataLoggerPorts = ComPortChecker.FindValidPorts();
+            if (dataLoggerPorts.Count > 0)
+            {
+                for (int i = 0; i<dataLoggerPorts.Count;i++)
+                {
+                    Debug.WriteLine(dataLoggerPorts[i]);
+                }
+                
+            }
+            
+            //serialPortManager = new SerialPortManager("COM3");
+            //serialPortManager.DataReceived += OnDataReceived;
+            //serialPortManager.OpenPort();
         
         }
 

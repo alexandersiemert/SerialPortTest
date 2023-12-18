@@ -114,6 +114,7 @@ namespace SerialPortTest
                 MessageBox.Show("An error has occurred: " + serialPort.PortName + ": " + ex.Message, "COM-Port Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
             }
         }
+
         // Starten Sie den Timer, wenn Sie auf Daten warten
         private void StartDataReception()
         {
@@ -126,8 +127,8 @@ namespace SerialPortTest
             dataReceiveTimer.Stop();
         }
 
-        // Event wenn Timeout Timer abgelaufen
-        private void DataReceiveTimer_Elapsed(object sender, ElapsedEventArgs e)
+            // Event wenn Timeout Timer abgelaufen
+            private void DataReceiveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             MessageBox.Show("Timeout: " + serialPort.PortName + " not responding.", "COM-Port Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
             // Timeout Timer anhalten
