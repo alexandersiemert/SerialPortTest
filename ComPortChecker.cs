@@ -38,6 +38,10 @@ namespace SerialPortTest
                             responsivePorts.Add(portName);
                         }
                     }
+                    catch
+                    {
+
+                    }
                     finally
                     {
                         port.Close();

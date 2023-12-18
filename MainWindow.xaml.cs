@@ -39,9 +39,9 @@ namespace SerialPortTest
                 
             }
             
-            //serialPortManager = new SerialPortManager("COM3");
-            //serialPortManager.DataReceived += OnDataReceived;
-            //serialPortManager.OpenPort();
+            serialPortManager = new SerialPortManager("COM3");
+            serialPortManager.DataReceived += OnDataReceived;
+            serialPortManager.OpenPort();
         
         }
 
@@ -50,11 +50,14 @@ namespace SerialPortTest
         /*################################# EVENTHANDLER ##################################################*/
 
         //Evenhandler für DataReceived
-        private void OnDataReceived(string data)
+        private void OnDataReceived(string[] data)
         {
             Dispatcher.Invoke(() =>
             {
-                txtResponse.Text = data; // Angenommen, txtResponse ist Ihre TextBox
+                
+                    txtResponse.Text = data[3]; // Angenommen, txtResponse ist Ihre TextBox
+               
+                
             });
         }
 
@@ -71,7 +74,7 @@ namespace SerialPortTest
         //Eventhandler für Button 
         private void btnSendCommand_Click(object sender, RoutedEventArgs e)
         {
-            serialPortManager.SendCommand("G");
+            serialPortManager.SendCommand("S");
         }
     }
 
