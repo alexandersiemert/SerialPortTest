@@ -56,6 +56,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ComPortChecker.cs" />
+    <Compile Include="DataLogger.cs" />
     <Compile Include="SerialPortManager.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

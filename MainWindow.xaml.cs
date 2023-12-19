@@ -54,9 +54,8 @@ namespace SerialPortTest
         {
             Dispatcher.Invoke(() =>
             {
-                
-                    txtResponse.Text = data[3]; // Angenommen, txtResponse ist Ihre TextBox
-               
+
+                txtResponse.Text = data[3]; // Angenommen, txtResponse ist Ihre TextBox
                 
             });
         }
@@ -74,7 +73,7 @@ namespace SerialPortTest
         //Eventhandler für Button 
         private void btnSendCommand_Click(object sender, RoutedEventArgs e)
         {
-            serialPortManager.SendCommand("S");
+            serialPortManager.SendCommand("G");
         }
     }
 
